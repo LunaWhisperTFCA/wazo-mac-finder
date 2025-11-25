@@ -35,8 +35,7 @@ class WazoClient:
                 return {"status": "success"}
             return response.json() if response.content else {}
         except requests.exceptions.HTTPError as err:
-            # ... (error handling)
-            pass
+            raise WazoAPIError(f"HTTP Error: {err}")
         except requests.exceptions.RequestException as e:
             raise WazoAPIError(f"Request Error: {e}")
 
