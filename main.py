@@ -36,10 +36,11 @@ def process_device_on_server(client: WazoClient, mac: str, server_name: str) -> 
     Process device on a specific server. Returns True if device found and processed, False otherwise.
     """
     try:
-        console.print(f"[bold blue]Scanning {server_name}...[/bold blue]")
+        console.rule(f"[bold blue]Scanning {server_name}[/bold blue]")
         device = client.get_rich_device_details(mac)
 
         if not device:
+            console.print(f"[dim]Device not found on {server_name}[/dim]")
             return False
 
         if not device.get('line_exten'):
@@ -71,14 +72,15 @@ def process_device_on_server(client: WazoClient, mac: str, server_name: str) -> 
                 console.print("\nOpération annulée.", style="info")
                 sys.exit(1)
 
+        console.rule("[bold green]Result[/bold green]")
         print_device_info(device)
         return True
 
     except WazoAPIError as e:
-        print_error(f"Erreur API sur {server_name}: {e}")
+        console.print(f"[error]Error on {server_name}: {e}[/error]")
         return False
     except Exception as e:
-        print_error(f"Erreur inattendue sur {server_name}: {e}")
+        console.print(f"[error]Unexpected error on {server_name}: {e}[/error]")
         return False
 
 def main():
@@ -133,6 +135,7 @@ def main():
             break # Stop scanning if found
 
     if not found_any:
+        console.rule("[bold red]Result[/bold red]")
         print_not_found(args.mac)
         sys.exit(2)
 
