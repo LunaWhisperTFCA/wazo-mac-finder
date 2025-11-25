@@ -19,5 +19,28 @@ class Config:
         if os.path.exists(dotenv_path):
             load_dotenv(dotenv_path=dotenv_path)
         
-        self.host: Optional[str] = os.getenv('WAZO_HOST')
-        self.token: Optional[str] = os.getenv('WAZO_TOKEN')
+        self.servers = self._load_servers()
+
+    def _load_servers(self):
+        """Load all Wazo server configurations from environment variables."""
+        servers = []
+        
+        # Check for the primary server (no suffix)
+        host = os.getenv('WAZO_HOST')
+        token = os.getenv('WAZO_TOKEN')
+        if host and token:
+            servers.append({'host': host, 'token': token, 'name': 'Server 1'})
+
+        # Check for additional servers (WAZO_HOST2, WAZO_HOST3, etc.)
+        i = 2
+        while True:
+            host = os.getenv(f'WAZO_HOST{i}')
+            token = os.getenv(f'WAZO_TOKEN{i}')
+            
+            if not (host and token):
+                break
+            
+            servers.append({'host': host, 'token': token, 'name': f'Server {i}'})
+            i += 1
+            
+        return servers
