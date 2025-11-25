@@ -35,9 +35,21 @@ class WazoClient:
                 return {"status": "success"}
             return response.json() if response.content else {}
         except requests.exceptions.HTTPError as err:
-            raise WazoAPIError(f"HTTP Error: {err}")
+            status_code = response.status_code
+            error_msg = f"HTTP Error {status_code}: {err}"
+            
+            if status_code == 401:
+                error_msg += " | Try to update your Wazo Token or verify you have the right permissions for execute the programes."
+            elif status_code == 403:
+                error_msg += " | Forbidden. You do not have permission to access this resource."
+            elif status_code == 404:
+                error_msg += " | Resource not found. Please check the URL or ID."
+            elif status_code >= 500:
+                error_msg += " | Server Error. Please check the Wazo server status."
+                
+            raise WazoAPIError(error_msg)
         except requests.exceptions.RequestException as e:
-            raise WazoAPIError(f"Request Error: {e}")
+            raise WazoAPIError(f"Request Error: {e} | Please check your network connection or Wazo Host URL.")
 
     # --- GET methods from before ---
     def get_device_by_mac(self, mac: str) -> Optional[Dict]:
